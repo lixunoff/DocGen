@@ -1,7 +1,8 @@
 // src/app/api/generate-pdf/route.ts
 
 import { NextRequest, NextResponse } from 'next/server';
-import puppeteer from 'puppeteer';
+import puppeteer from 'puppeteer-core';
+import chromium from '@sparticuz/chromium';
 import * as a6labsTemplate1 from '@/templates/letterheads/a6labs/template1';
 
 interface FormData {
@@ -47,8 +48,9 @@ export async function POST(request: NextRequest) {
     const html = generateMultiPageHTML(formData, textPages, template);
     
     const browser = await puppeteer.launch({
-      headless: true,
-      args: ['--no-sandbox', '--disable-setuid-sandbox']
+        args: [...chromium.args, '--no-sandbox', '--disable-setuid-sandbox'],
+        executablePath: await chromium.executablePath(),
+        headless: true,
     });
     
     const page = await browser.newPage();
@@ -237,12 +239,13 @@ async function splitTextByHeight(
   
   console.log('=== Измерение в реальном Puppeteer ===');
   
-  const puppeteer = require('puppeteer');
+  const puppeteer = require('puppeteer-core');
   const a6labsTemplate1 = require('@/templates/letterheads/a6labs/template1');
   
   const browser = await puppeteer.launch({
+    args: [...chromium.args, '--no-sandbox', '--disable-setuid-sandbox'],
+    executablePath: await chromium.executablePath(),
     headless: true,
-    args: ['--no-sandbox', '--disable-setuid-sandbox']
   });
   
   const page = await browser.newPage();
