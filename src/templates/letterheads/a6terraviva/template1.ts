@@ -1,9 +1,9 @@
-// src/templates/letterheads/a6labs/template1.ts
+// src/templates/letterheads/a6terraviva/template1.ts
 
 import fs from 'fs';
 import path from 'path';
 
-export interface A6LabsTemplateData {
+export interface A6TerravivaTemplateData {
   date: string;
   letterTitle: string;
   recipient: string;
@@ -25,7 +25,7 @@ function getImageBase64(imagePath: string): string {
 }
 
 export function generateFirstPage(
-  data: A6LabsTemplateData, 
+  data: A6TerravivaTemplateData, 
   pageNumber: number, 
   totalPages: number
 ): string {
@@ -35,23 +35,33 @@ export function generateFirstPage(
   const formattedRecipient = recipient.replace(/,\s*/g, ',<br>');
   const formattedSignature = signature?.replace(/\.\s*/g, '.<br>');
   
-  const logoBase64 = getImageBase64('/assets/a6labs/logo.png');
-  const stampBase64 = getImageBase64('/assets/a6labs/stamp.png');
-  const bgBase64 = getImageBase64('/assets/a6labs/bg.png');
+  const logoA6Base64 = getImageBase64('/assets/a6terraviva/logo-1.png');
+  const stampA6Base64 = getImageBase64('/assets/a6terraviva/stamp-1.png');
+  const logoTerravivaBase64 = getImageBase64('/assets/a6terraviva/logo-2.png');
+  const stampTerravivaBase64 = getImageBase64('/assets/a6terraviva/stamp-2.png');
+  const bgBase64 = getImageBase64('/assets/a6terraviva/bg.png');
   
-  // Если одностраничный документ с подписью - добавляем класс для прижатия подписи к низу
   const isOnePageWithSignature = totalPages === 1 && signature;
   const mainContentClass = isOnePageWithSignature ? 'main-content one-page-signature' : 'main-content';
   
   return `
-    <div class="page a6labs-page">
+    <div class="page a6terraviva-page">
       ${bgBase64 ? `<img src="${bgBase64}" class="background-image" alt="" />` : ''}
       <div class="content">
-        <div class="header">
-          ${logoBase64 ? `<img src="${logoBase64}" class="logo-img" alt="A6 Labs" />` : '<div class="logo-text">A6 Labs</div>'}
-          <div class="address">
-           GV10, Dubai International Financial Centre,<br>
-            Dubai, United Arab Emirates
+        <div class="header-dual">
+          <div class="header-left">
+            ${logoA6Base64 ? `<img src="${logoA6Base64}" class="logo-img" alt="A6 Labs" />` : '<div class="logo-text">A6 Labs</div>'}
+            <div class="address">
+              GV10, Dubai International Financial Centre,<br>
+              Dubai, United Arab Emirates
+            </div>
+          </div>
+          <div class="header-right">
+            ${logoTerravivaBase64 ? `<img src="${logoTerravivaBase64}" class="logo-img-terraviva" alt="Terraviva" />` : '<div class="logo-text">Terraviva</div>'}
+            <div class="address">
+              JAFZA 15, Jebel Ali Dubai,<br>
+              Dubai, United Arab Emirates
+            </div>
           </div>
         </div>
         
@@ -61,10 +71,11 @@ export function generateFirstPage(
         </div>
         
         <div class="${mainContentClass}">
-          <div class="left-column">
+          <div class="left-column-dual">
             <div class="recipient">${formattedRecipient}</div>
-            <div class="stamp-container">
-              ${stampBase64 ? `<img src="${stampBase64}" class="stamp-img" alt="Stamp" />` : '<div class="stamp-placeholder">A6 LABS<br>STAMP</div>'}
+            <div class="stamps-container">
+              ${stampA6Base64 ? `<img src="${stampA6Base64}" class="stamp-img" alt="A6 Labs Stamp" />` : '<div class="stamp-placeholder">A6 LABS<br>STAMP</div>'}
+              ${stampTerravivaBase64 ? `<img src="${stampTerravivaBase64}" class="stamp-img" alt="Terraviva Stamp" />` : '<div class="stamp-placeholder">TERRAVIVA<br>STAMP</div>'}
             </div>
           </div>
           
@@ -81,7 +92,7 @@ export function generateFirstPage(
 }
 
 export function generateContinuationPage(
-  data: A6LabsTemplateData, 
+  data: A6TerravivaTemplateData, 
   pageNumber: number, 
   totalPages: number
 ): string {
@@ -89,26 +100,38 @@ export function generateContinuationPage(
   
   const formattedSignature = signature?.replace(/\.\s*/g, '.<br>');
   
-  const logoBase64 = getImageBase64('/assets/a6labs/logo.png');
-  const stampBase64 = getImageBase64('/assets/a6labs/stamp.png');
-  const bgBase64 = getImageBase64('/assets/a6labs/bg.png');
+  const logoA6Base64 = getImageBase64('/assets/a6terraviva/logo-1.png');
+  const stampA6Base64 = getImageBase64('/assets/a6terraviva/stamp-1.png');
+  const logoTerravivaBase64 = getImageBase64('/assets/a6terraviva/logo-2.png');
+  const stampTerravivaBase64 = getImageBase64('/assets/a6terraviva/stamp-2.png');
+  const bgBase64 = getImageBase64('/assets/a6terraviva/bg.png');
   
   return `
-    <div class="page a6labs-page">
+    <div class="page a6terraviva-page">
       ${bgBase64 ? `<img src="${bgBase64}" class="background-image" alt="" />` : ''}
       <div class="content">
-        <div class="header">
-          ${logoBase64 ? `<img src="${logoBase64}" class="logo-img" alt="A6 Labs" />` : '<div class="logo-text">A6 Labs</div>'}
-          <div class="address">
-            Unit GV-00-10-07-OF-02, Level 7, Gate Village Building 10,<br>
-            Dubai International Financial Centre, Dubai, United Arab Emirates
+        <div class="header-dual">
+          <div class="header-left">
+            ${logoA6Base64 ? `<img src="${logoA6Base64}" class="logo-img" alt="A6 Labs" />` : '<div class="logo-text">A6 Labs</div>'}
+            <div class="address">
+              GV10, Dubai International Financial Centre,<br>
+              Dubai, United Arab Emirates
+            </div>
+          </div>
+          <div class="header-right">
+            ${logoTerravivaBase64 ? `<img src="${logoTerravivaBase64}" class="logo-img-terraviva" alt="Terraviva" />` : '<div class="logo-text">Terraviva</div>'}
+            <div class="address">
+              JAFZA 15, Jebel Ali Dubai,<br>
+              Dubai, United Arab Emirates
+            </div>
           </div>
         </div>
         
         <div class="main-content continuation">
-          <div class="left-column">
-            <div class="stamp-container">
-              ${stampBase64 ? `<img src="${stampBase64}" class="stamp-img" alt="Stamp" />` : '<div class="stamp-placeholder">A6 LABS<br>STAMP</div>'}
+          <div class="left-column-dual">
+            <div class="stamps-container">
+              ${stampA6Base64 ? `<img src="${stampA6Base64}" class="stamp-img" alt="A6 Labs Stamp" />` : '<div class="stamp-placeholder">A6 LABS<br>STAMP</div>'}
+              ${stampTerravivaBase64 ? `<img src="${stampTerravivaBase64}" class="stamp-img" alt="Terraviva Stamp" />` : '<div class="stamp-placeholder">TERRAVIVA<br>STAMP</div>'}
             </div>
           </div>
           
@@ -142,13 +165,13 @@ export function getStyles(): string {
       color: #27272a;
     }
     
-    .a6labs-page {
+    .a6terraviva-page {
       width: 210mm;
       height: 297mm;
       position: relative;
       page-break-after: always;
       page-break-inside: avoid;
-      background: white;
+      background: #F0F5FB;
       overflow: hidden;
       box-sizing: border-box;
     }
@@ -157,7 +180,7 @@ export function getStyles(): string {
       position: absolute;
       right: 0;
       bottom: 0;
-      width: 317pt;
+      width: 100%;
       height: auto;
       z-index: 0;
       pointer-events: none;
@@ -173,17 +196,32 @@ export function getStyles(): string {
       box-sizing: border-box;
     }
     
-    .header {
+    .header-dual {
       display: flex;
       justify-content: space-between;
       align-items: flex-start;
       margin-bottom: 97pt;
       flex-shrink: 0;
+      border-bottom: 1px solid rgba(148, 163, 184, 0.2);
+      padding-bottom: 15pt;
+    }
+    
+    .header-left,
+    .header-right {
+      display: flex;
+      flex-direction: column;
+      gap: 8pt;
+      align-items: flex-start;
     }
     
     .logo-img {
-      width: 86pt;
-      height: auto;
+      height: 12pt;
+      width: auto;
+    }
+    
+    .logo-img-terraviva {
+      height: 10pt;
+      width: auto;
     }
     
     .logo-text {
@@ -193,11 +231,11 @@ export function getStyles(): string {
     }
     
     .address {
-      max-width: 320pt;
+      max-width: 200pt;
       font-size: 9pt;
-      color: #a3a3a3;
-      text-align: left;
+      color: #91B3C7;
       line-height: 1.667;
+      text-align: left;
     }
     
     .date-title {
@@ -210,7 +248,7 @@ export function getStyles(): string {
     .date {
       width: 113pt;
       font-size: 9pt;
-      color: #a3a3a3;
+      color: #91B3C7;
       line-height: 1.667;
     }
     
@@ -250,7 +288,7 @@ export function getStyles(): string {
       margin-top: 0;
     }
     
-    .left-column {
+    .left-column-dual {
       width: 113pt;
       display: flex;
       flex-direction: column;
@@ -260,15 +298,15 @@ export function getStyles(): string {
     
     .recipient {
       font-size: 9pt;
-      color: #a3a3a3;
+      color: #91B3C7;
       line-height: 1.667;
     }
     
-    .stamp-container {
-      width: 113pt;
-      height: 113pt;
+    .stamps-container {
+      display: flex;
+      flex-direction: column;
+      gap: 15pt;
       margin-top: auto;
-      flex-shrink: 0;
     }
     
     .stamp-img {
@@ -338,7 +376,7 @@ export function getStyles(): string {
       bottom: 29pt;
       right: 29pt;
       font-size: 9pt;
-      color: #a3a3a3;
+      color: #91B3C7;
       text-align: right;
     }
   `;

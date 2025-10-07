@@ -47,6 +47,20 @@ export default function Home() {
     }
   }, [isInitialLoad, selectedTemplateId, formData.date]);
 
+  // Автоматично змінюємо шаблон при зміні компанії або типу документу
+  useEffect(() => {
+    if (availableTemplates.length > 0) {
+      setSelectedTemplateId(availableTemplates[0].id);
+    }
+  }, [selectedCompany, activeDocType]);
+
+  // Автоматично генеруємо PDF при зміні шаблону (але не при першій загрузці)
+  useEffect(() => {
+    if (!isInitialLoad && selectedTemplateId) {
+      setShouldGeneratePreview(true);
+    }
+  }, [selectedTemplateId, isInitialLoad]);
+
   const handleGeneratePreview = () => {
     setShouldGeneratePreview(true);
   };

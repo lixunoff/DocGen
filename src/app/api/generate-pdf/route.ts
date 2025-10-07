@@ -3,6 +3,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import puppeteer from 'puppeteer';
 import * as a6labsTemplate1 from '@/templates/letterheads/a6labs/template1';
+import * as a6terravivaTemplate1 from '@/templates/letterheads/a6terraviva/template1';
 
 interface FormData {
   date: string;
@@ -30,7 +31,8 @@ export async function POST(request: NextRequest) {
       textPages = await splitTextByHeight(
         formData.letterText,
         513,
-        580
+        580,
+        templateId
       );
       console.log('Measured and split into', textPages.length, 'pages');
     } else {
@@ -38,8 +40,10 @@ export async function POST(request: NextRequest) {
     }
     
     let template;
-    if (templateId === 'a6labs-letterhead-1') {
+    if (templateId === 'a6labs-letterhead-1' || templateId === 'a6labs-letterhead-2') {
       template = a6labsTemplate1;
+    } else if (templateId === 'a6terraviva-letterhead-1') {
+      template = a6terravivaTemplate1;
     } else {
       throw new Error(`Unknown template: ${templateId}`);
     }
@@ -229,7 +233,8 @@ async function measureTextInActualTemplate(
 async function splitTextByHeight(
   text: string,
   firstPageMaxHeight: number,
-  otherPageMaxHeight: number
+  otherPageMaxHeight: number,
+  templateId: string
 ): Promise<string[]> {
   const LINE_HEIGHT_PX = 15;
   const FIRST_PAGE_MAX_LINES = Math.floor(firstPageMaxHeight / LINE_HEIGHT_PX);
@@ -238,7 +243,14 @@ async function splitTextByHeight(
   console.log('=== Измерение в реальном Puppeteer ===');
   
   const puppeteer = require('puppeteer');
-  const a6labsTemplate1 = require('@/templates/letterheads/a6labs/template1');
+  
+  // Вибираємо правильний шаблон для вимірювання
+  let templateModule;
+  if (templateId === 'a6terraviva-letterhead-1') {
+    templateModule = require('@/templates/letterheads/a6terraviva/template1');
+  } else {
+    templateModule = require('@/templates/letterheads/a6labs/template1');
+  }
   
   const browser = await puppeteer.launch({
     headless: true,
@@ -253,10 +265,10 @@ async function splitTextByHeight(
     <head>
       <meta charset="utf-8">
       <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-      <style>${a6labsTemplate1.getStyles()}</style>
+      <style>${templateModule.getStyles()}</style>
     </head>
     <body>
-      ${a6labsTemplate1.generateFirstPage({
+      ${templateModule.generateFirstPage({
         date: 'Test',
         letterTitle: 'Test',
         recipient: 'Test',
@@ -369,7 +381,7 @@ async function splitTextByHeight(
 function generateMultiPageHTML(
   formData: FormData, 
   textPages: string[], 
-  template: typeof a6labsTemplate1
+  template: typeof a6labsTemplate1 | typeof a6terravivaTemplate1
 ): string {
   const pages: string[] = [];
   const totalPages = textPages.length;

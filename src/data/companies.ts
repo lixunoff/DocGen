@@ -6,7 +6,7 @@ export const companies: CompanyData[] = [
   {
     id: 'a6labs',
     name: 'A6 Labs',
-    address: 'Unit DV-00-10-07-OF-04, Level 7, Gate Village Building 10, Dubai International Financial Centre, Dubai, United Arab Emirates'
+    address: 'GV10, Dubai International Financial Centre, Dubai, United Arab Emirates'
   },
   {
     id: 'reneum',
