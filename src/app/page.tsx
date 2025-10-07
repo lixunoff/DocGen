@@ -59,7 +59,7 @@ export default function Home() {
     if (selectedCompany === 'a6terraviva') {
       setFormData(prev => ({
         ...prev,
-        senderSignature: 'Sincerely, \nHarib Bakhshi, CEO, A6 Labs. Felix Mechnig-Giordano, General Manager, Terraviva'
+        senderSignature: 'Sincerely, Harib Bakhshi, CEO, A6 Labs. Felix Mechnig-Giordano, General Manager, Terraviva'
       }));
     } else if (selectedCompany === 'a6labs') {
       setFormData(prev => ({

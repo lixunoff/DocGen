@@ -34,10 +34,11 @@ export function generateFirstPage(
   const formattedDate = date.replace(/,\s*/g, ',<br>');
   const formattedRecipient = recipient.replace(/,\s*/g, ',<br>');
   
-  // Properly format signature: convert \n to <br> and ". " to ".<br>"
+  // Properly format signature: always add <br> after "Sincerely," and convert other line breaks
   const formattedSignature = signature
     ? signature
         .replace(/\n/g, '<br>')
+        .replace(/Sincerely,/gi, 'Sincerely,<br>')
         .replace(/\.\s+/g, '.<br>')
     : '';
   
@@ -104,10 +105,11 @@ export function generateContinuationPage(
 ): string {
   const { letterText, signature } = data;
   
-  // Properly format signature: convert \n to <br> and ". " to ".<br>"
+  // Properly format signature: always add <br> after "Sincerely," and convert other line breaks
   const formattedSignature = signature
     ? signature
         .replace(/\n/g, '<br>')
+        .replace(/Sincerely,/gi, 'Sincerely,<br>')
         .replace(/\.\s+/g, '.<br>')
     : '';
   
