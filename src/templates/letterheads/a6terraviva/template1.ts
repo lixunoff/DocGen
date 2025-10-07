@@ -33,7 +33,13 @@ export function generateFirstPage(
   
   const formattedDate = date.replace(/,\s*/g, ',<br>');
   const formattedRecipient = recipient.replace(/,\s*/g, ',<br>');
-  const formattedSignature = signature?.replace(/\.\s*/g, '.<br>');
+  
+  // Properly format signature: convert \n to <br> and ". " to ".<br>"
+  const formattedSignature = signature
+    ? signature
+        .replace(/\n/g, '<br>')
+        .replace(/\.\s+/g, '.<br>')
+    : '';
   
   const logoA6Base64 = getImageBase64('/assets/a6terraviva/logo-1.png');
   const stampA6Base64 = getImageBase64('/assets/a6terraviva/stamp-1.png');
@@ -98,7 +104,12 @@ export function generateContinuationPage(
 ): string {
   const { letterText, signature } = data;
   
-  const formattedSignature = signature?.replace(/\.\s*/g, '.<br>');
+  // Properly format signature: convert \n to <br> and ". " to ".<br>"
+  const formattedSignature = signature
+    ? signature
+        .replace(/\n/g, '<br>')
+        .replace(/\.\s+/g, '.<br>')
+    : '';
   
   const logoA6Base64 = getImageBase64('/assets/a6terraviva/logo-1.png');
   const stampA6Base64 = getImageBase64('/assets/a6terraviva/stamp-1.png');

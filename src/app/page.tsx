@@ -54,6 +54,21 @@ export default function Home() {
     }
   }, [selectedCompany, activeDocType]);
 
+  // Змінюємо дефолтний підпис залежно від компанії
+  useEffect(() => {
+    if (selectedCompany === 'a6terraviva') {
+      setFormData(prev => ({
+        ...prev,
+        senderSignature: 'Sincerely, \nHarib Bakhshi, CEO, A6 Labs. Felix Mechnig-Giordano, General Manager, Terraviva'
+      }));
+    } else if (selectedCompany === 'a6labs') {
+      setFormData(prev => ({
+        ...prev,
+        senderSignature: 'Sincerely, [Your Full Name]. [Your Position], [Company].'
+      }));
+    }
+  }, [selectedCompany]);
+
   // Автоматично генеруємо PDF при зміні шаблону (але не при першій загрузці)
   useEffect(() => {
     if (!isInitialLoad && selectedTemplateId) {

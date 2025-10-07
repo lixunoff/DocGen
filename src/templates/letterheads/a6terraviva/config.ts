@@ -35,7 +35,7 @@ export const a6TerravivaLetterheadTemplate: TemplateConfig = {
       label: "Sender's signature:",
       type: 'text',
       required: true,
-      placeholder: 'Sincerely, [Your Full Name]. [Your Position], [Company].'
+      placeholder: 'Sincerely, \nHarib Bakhshi, CEO, A6 Labs. Felix Mechnig-Giordano, General Manager, Terraviva'
     },
     {
       name: 'letterText',
