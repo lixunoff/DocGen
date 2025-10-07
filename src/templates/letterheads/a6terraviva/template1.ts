@@ -215,12 +215,12 @@ export function getStyles(): string {
     }
     
     .logo-img {
-      height: 12pt;
+      height: 16pt;
       width: auto;
     }
     
     .logo-img-terraviva {
-      height: 10pt;
+      height: 16pt;
       width: auto;
     }
     
