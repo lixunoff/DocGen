@@ -4,7 +4,6 @@
 
 import { Company } from '@/types';
 import { companies } from '@/data/companies';
-import { useState } from 'react';
 
 interface CompanySelectorProps {
   selectedCompany: Company;
@@ -15,58 +14,27 @@ export default function CompanySelector({
   selectedCompany,
   onCompanyChange,
 }: CompanySelectorProps) {
-  const [isOpen, setIsOpen] = useState(false);
-
-  const currentCompany = companies.find((c) => c.id === selectedCompany);
-
   return (
-    <div className="relative h-10 inline-flex justify-start items-center gap-2">
-      <button
-        onClick={() => setIsOpen(!isOpen)}
-        className="inline-flex items-center gap-2 hover:opacity-80 transition-opacity"
-      >
-        <div className="justify-start text-zinc-800 text-sm font-bold font-['Inter'] leading-tight">
-          {currentCompany?.name}
-        </div>
-        <div className="w-4 h-4 relative overflow-hidden">
-          <svg
-            className="w-3 h-3 absolute left-[2px] top-[2px]"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 12 12"
-            strokeWidth="1.5"
-          >
-            <path d="M3 4.5L6 7.5L9 4.5" />
-          </svg>
-        </div>
-      </button>
-
-      {isOpen && (
-        <>
+    <div className="p-1 bg-neutral-100 rounded-lg inline-flex justify-start items-center gap-1">
+      {companies.map((company) => (
+        <button
+          key={company.id}
+          onClick={() => onCompanyChange(company.id)}
+          className={`px-3 py-1 flex justify-center items-center gap-2.5 ${
+            company.id === selectedCompany
+              ? 'bg-white rounded-md shadow-[0px_1px_3px_0px_rgba(0,0,0,0.08)]'
+              : 'bg-transparent'
+          }`}
+        >
           <div
-            className="fixed inset-0 z-10"
-            onClick={() => setIsOpen(false)}
-          />
-          <div className="absolute top-full left-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-black/10 z-20 overflow-hidden">
-            {companies.map((company) => (
-              <button
-                key={company.id}
-                onClick={() => {
-                  onCompanyChange(company.id);
-                  setIsOpen(false);
-                }}
-                className={`w-full px-4 py-2 text-left text-sm font-['Inter'] hover:bg-neutral-100 transition-colors ${
-                  company.id === selectedCompany
-                    ? 'bg-neutral-50 font-bold text-zinc-800'
-                    : 'text-zinc-600'
-                }`}
-              >
-                {company.name}
-              </button>
-            ))}
+            className={`text-zinc-800 text-sm font-bold font-['Inter'] leading-tight transition-opacity ${
+              company.id === selectedCompany ? 'opacity-100' : 'opacity-30 hover:opacity-100'
+            }`}
+          >
+            {company.name}
           </div>
-        </>
-      )}
+        </button>
+      ))}
     </div>
   );
 }

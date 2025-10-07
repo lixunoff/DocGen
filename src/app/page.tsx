@@ -101,10 +101,12 @@ export default function Home() {
 
       <div className="flex-1 px-20 py-8 flex flex-col overflow-y-auto scrollbar-hide">
         <div className="pb-8 flex flex-col gap-8">
-          <CompanySelector
-            selectedCompany={selectedCompany}
-            onCompanyChange={setSelectedCompany}
-          />
+          <div className="self-start">
+            <CompanySelector
+              selectedCompany={selectedCompany}
+              onCompanyChange={setSelectedCompany}
+            />
+          </div>
 
           {selectedTemplate && (
             <>

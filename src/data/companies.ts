@@ -9,13 +9,8 @@ export const companies: CompanyData[] = [
     address: 'GV10, Dubai International Financial Centre, Dubai, United Arab Emirates'
   },
   {
-    id: 'reneum',
-    name: 'Reneum',
-    address: 'Address for Reneum' // Update with actual address
-  },
-  {
     id: 'a6terraviva',
-    name: 'A6 + Terraviva',
+    name: 'A6+Terraviva',
     address: 'Address for A6 + Terraviva' // Update with actual address
   }
 ];
