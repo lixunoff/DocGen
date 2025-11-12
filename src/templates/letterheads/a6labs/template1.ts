@@ -33,13 +33,19 @@ export function generateFirstPage(
   
   const formattedDate = date.replace(/,\s*/g, ',<br>');
   const formattedRecipient = recipient.replace(/,\s*/g, ',<br>');
-  const formattedSignature = signature?.replace(/\.\s*/g, '.<br>');
+  
+  // Format signature
+  const formattedSignature = signature
+    ? signature
+        .replace(/\n/g, '<br>')
+        .replace(/Sincerely,/gi, 'Sincerely,<br><br>')
+        .replace(/\.\s+/g, '.<br>')
+    : '';
   
   const logoBase64 = getImageBase64('/assets/a6labs/logo.png');
   const stampBase64 = getImageBase64('/assets/a6labs/stamp.png');
   const bgBase64 = getImageBase64('/assets/a6labs/bg.png');
   
-  // Если одностраничный документ с подписью - добавляем класс для прижатия подписи к низу
   const isOnePageWithSignature = totalPages === 1 && signature;
   const mainContentClass = isOnePageWithSignature ? 'main-content one-page-signature' : 'main-content';
   
@@ -87,7 +93,13 @@ export function generateContinuationPage(
 ): string {
   const { letterText, signature } = data;
   
-  const formattedSignature = signature?.replace(/\.\s*/g, '.<br>');
+  // Format signature
+  const formattedSignature = signature
+    ? signature
+        .replace(/\n/g, '<br>')
+        .replace(/Sincerely,/gi, 'Sincerely,<br><br>')
+        .replace(/\.\s+/g, '.<br>')
+    : '';
   
   const logoBase64 = getImageBase64('/assets/a6labs/logo.png');
   const stampBase64 = getImageBase64('/assets/a6labs/stamp.png');
@@ -100,8 +112,8 @@ export function generateContinuationPage(
         <div class="header">
           ${logoBase64 ? `<img src="${logoBase64}" class="logo-img" alt="A6 Labs" />` : '<div class="logo-text">A6 Labs</div>'}
           <div class="address">
-            Unit GV-00-10-07-OF-02, Level 7, Gate Village Building 10,<br>
-            Dubai International Financial Centre, Dubai, United Arab Emirates
+            GV10, Dubai International Financial Centre,<br>
+            Dubai, United Arab Emirates
           </div>
         </div>
         
@@ -303,36 +315,144 @@ export function getStyles(): string {
     .letter-text {
       font-size: 9pt;
       line-height: 1.667;
-      white-space: pre-line;
       overflow: hidden;
+      flex: 1;
     }
     
-    .letter-text ul {
-      margin: 15px 0 0 0;
-      padding: 0;
-      list-style: none;
-    }
+    /* === БАЗОВІ СТИЛІ ДЛЯ ТЕКСТУ === */
     
-    .letter-text li {
-      position: relative;
-      padding-left: 15px;
+    /* Параграфи - БЕЗ margin (відступи додаємо вручну через порожні <p>) */
+    .letter-text p {
       margin: 0;
+      page-break-inside: avoid;
     }
     
-    .letter-text li::before {
-      content: '•';
-      position: absolute;
-      left: 0;
+    /* Якщо параграф містить тільки <br> (порожній) - додаємо відступ */
+    .letter-text p:has(br:only-child) {
+      height: 15pt;
+      line-height: 15pt;
     }
     
+    /* Форматування тексту */
+    .letter-text strong,
+    .letter-text b {
+      font-weight: 700;
+    }
+    
+    .letter-text em,
+    .letter-text i {
+      font-style: italic;
+    }
+    
+    .letter-text u {
+      text-decoration: underline;
+    }
+    
+    /* === СПИСКИ === */
+    
+    /* Нумерований список */
+    .letter-text ol {
+      margin: 0 !important;
+      padding: 0 !important;
+      list-style: decimal !important;
+      list-style-position: outside !important;
+      padding-left: 20pt !important;
+    }
+    
+    .letter-text ol > li {
+      margin: 0 !important;
+      padding-left: 0 !important;
+      text-indent: 0 !important;
+      line-height: 1.667;
+      list-style: decimal !important;
+    }
+    
+    .letter-text ol > li::marker {
+      font-weight: 400;
+    }
+    
+    /* Ненумерований список */
+    .letter-text ul {
+      margin: 0 !important;
+      padding: 0 !important;
+      list-style: disc !important;
+      list-style-position: outside !important;
+      padding-left: 15pt !important;
+    }
+    
+    .letter-text ul > li {
+      margin: 0 !important;
+      padding-left: 0 !important;
+      text-indent: 0 !important;
+      line-height: 1.667;
+      list-style: disc !important;
+    }
+    
+    .letter-text ul > li::marker {
+      font-weight: 400;
+    }
+    
+    /* Quill додає data-list атрибути */
+    .letter-text li[data-list="bullet"] {
+      list-style: disc !important;
+    }
+    
+    .letter-text li[data-list="ordered"] {
+      list-style: decimal !important;
+    }
+    
+    /* Заголовки */
+    .letter-text h1 {
+      font-size: 12pt;
+      font-weight: 700;
+      margin: 0 0 8pt 0;
+      line-height: 1.4;
+    }
+    
+    .letter-text h2 {
+      font-size: 11pt;
+      font-weight: 700;
+      margin: 0 0 6pt 0;
+      line-height: 1.4;
+    }
+    
+    .letter-text h3 {
+      font-size: 10pt;
+      font-weight: 700;
+      margin: 0 0 4pt 0;
+      line-height: 1.4;
+    }
+    
+    /* Посилання */
+    .letter-text a {
+      color: #076143;
+      text-decoration: underline;
+    }
+    
+    /* Підпис */
     .signature {
       font-size: 9pt;
       line-height: 1.667;
-      margin-top: 29pt;
-      padding-top: 20pt;
+      margin-top: 20pt;
+      padding-top: 15pt;
       flex-shrink: 0;
     }
 
+    /* Правила для сторінок продовження */
+    .main-content.continuation .signature {
+      margin-top: 20pt !important;
+      padding-top: 15pt !important;
+    }
+
+    .main-content.continuation .right-column {
+      justify-content: flex-start !important;
+    }
+
+    .main-content.continuation .letter-text {
+      flex: 0 0 auto !important;
+    }
+
+    /* Номер сторінки */
     .page-number {
       position: absolute;
       bottom: 29pt;

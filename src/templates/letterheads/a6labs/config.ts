@@ -6,7 +6,7 @@ export const a6LabsLetterheadTemplate: TemplateConfig = {
   id: 'a6labs-letterhead-1',
   company: 'a6labs',
   docType: 'letterheads',
-  name: 'Template 1',
+  name: 'Simple',
   thumbnail: '/assets/a6labs/template-1-thumb.png', // Updated path
   fields: [
     {

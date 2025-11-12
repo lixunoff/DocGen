@@ -6,7 +6,7 @@ export const a6LabsLetterheadTemplate2: TemplateConfig = {
   id: 'a6labs-letterhead-2',
   company: 'a6labs',
   docType: 'letterheads',
-  name: 'Template 2',
+  name: 'Green BG',
   thumbnail: '/assets/a6labs/template-2-thumb.png',
   fields: [
     {

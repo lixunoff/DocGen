@@ -4,7 +4,7 @@ import { TemplateConfig } from '@/types';
 
 export const a6TerravivaLetterheadTemplate: TemplateConfig = {
   id: 'a6terraviva-letterhead-1',
-  name: 'Template 1',
+  name: 'Simple',
   docType: 'letterheads',
   company: 'a6terraviva',
   thumbnail: '/assets/a6terraviva/template-1-thumb.png',
@@ -14,7 +14,6 @@ export const a6TerravivaLetterheadTemplate: TemplateConfig = {
       label: 'Date:',
       type: 'date',
       required: true,
-      placeholder: 'Friday, 29 August 2025'
     },
     {
       name: 'letterTitle',

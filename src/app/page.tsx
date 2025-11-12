@@ -11,6 +11,19 @@ import PDFPreview from '@/components/PDFPreview';
 import { DocType, Company } from '@/types';
 import { getTemplatesByDocTypeAndCompany } from '@/data/templates';
 
+function formatDate(date: Date): string {
+  const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+  const months = ['January', 'February', 'March', 'April', 'May', 'June', 
+                  'July', 'August', 'September', 'October', 'November', 'December'];
+  
+  const dayName = days[date.getDay()];
+  const day = date.getDate();
+  const monthName = months[date.getMonth()];
+  const year = date.getFullYear();
+  
+  return `${dayName}, ${day} ${monthName} ${year}`;
+}
+
 export default function Home() {
   const [activeDocType, setActiveDocType] = useState<DocType>('letterheads');
   const [selectedCompany, setSelectedCompany] = useState<Company>('a6labs');
@@ -18,13 +31,11 @@ export default function Home() {
     'a6labs-letterhead-1'
   );
   const [formData, setFormData] = useState<Record<string, string>>({
-    date: '',
+    date: formatDate(new Date()), // ✅ Одразу ініціалізуємо датою!
     letterTitle: 'Letter Subject',
     recipient: '[Full Name], [Position], [Company]',
     senderSignature: 'Sincerely, [Your Full Name]. [Your Position], [Company].',
-    letterText: `Dear [Recipient Name],
-
-[Write your letter content here. You can paste formatted text from Word or Google Docs, including bullet points and paragraphs.]`
+    letterText: `<p>Dear [Recipient Name],</p><p>[Write your letter content here. You can paste formatted text from Word or Google Docs, including bullet points and paragraphs.]</p>`
   });
 
   const [shouldGeneratePreview, setShouldGeneratePreview] = useState(false);
@@ -59,11 +70,13 @@ export default function Home() {
     if (selectedCompany === 'a6terraviva') {
       setFormData(prev => ({
         ...prev,
+        date: prev.date || formatDate(new Date()),
         senderSignature: 'Sincerely, Harib Bakhshi, CEO, A6 Labs. Felix Mechnig-Giordano, General Manager, Terraviva'
       }));
     } else if (selectedCompany === 'a6labs') {
       setFormData(prev => ({
         ...prev,
+        date: prev.date || formatDate(new Date()),
         senderSignature: 'Sincerely, [Your Full Name]. [Your Position], [Company].'
       }));
     }
@@ -121,7 +134,7 @@ export default function Home() {
                 className="self-start p-3 bg-emerald-600 rounded-lg shadow-[0px_4px_24px_0px_rgba(10,137,94,0.48)] flex justify-center items-center gap-2 hover:bg-emerald-700 transition-colors whitespace-nowrap"
                 >
                 <svg className="w-6 h-6" fill="none" stroke="white" viewBox="0 0 24 24" strokeWidth="2">
-                    <path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    <path d="M15 12a3 3 0 11-6 0 3 3 0 616 0z" />
                     <path d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                 </svg>
                 <div className="text-white text-sm font-bold leading-tight">

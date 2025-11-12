@@ -3,6 +3,7 @@
 import { TemplateConfig } from '@/types';
 import { useState, ChangeEvent, useEffect, useRef } from 'react';
 import mammoth from 'mammoth';
+import RichTextEditor from './RichTextEditor';
 
 interface FormContainerProps {
   template: TemplateConfig;
@@ -24,13 +25,11 @@ function formatDate(date: Date): string {
 }
 
 const defaultFormData = {
-  date: '',
+  date: formatDate(new Date()),
   letterTitle: 'Letter Subject',
   recipient: '[Full Name], [Position], [Company]',
   senderSignature: 'Sincerely, [Your Full Name]. [Your Position], [Company].',
-  letterText: `Dear [Recipient Name],
-
-[Write your letter content here. You can paste formatted text from Word or Google Docs, including bullet points and paragraphs.]`
+  letterText: `<p>Dear [Recipient Name],</p><p>[Write your letter content here. You can paste formatted text from Word or Google Docs, including bullet points and paragraphs.]</p>`
 };
 
 export default function FormContainer({
@@ -39,24 +38,102 @@ export default function FormContainer({
   onFormChange,
 }: FormContainerProps) {
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
+  const [isTitleBold, setIsTitleBold] = useState(false);
+  const [isSignatureVisible, setIsSignatureVisible] = useState(true);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
+    console.log('🔄 FormContainer mounted, formData.date:', formData.date);
+    
     if (!formData.date) {
+      console.log('⚠️ No date found, setting default date');
+      const newDate = formatDate(new Date());
+      console.log('📅 Setting date to:', newDate);
       onFormChange({
         ...formData,
-        date: formatDate(new Date()),
+        date: newDate,
       });
     }
+    
+    // Перевіряємо чи заголовок містить <strong>
+    if (formData.letterTitle) {
+      setIsTitleBold(formData.letterTitle.includes('<strong>'));
+    }
   }, []);
+
+  // Функція для перемикання bold стилю заголовка
+  const toggleTitleBold = () => {
+    const currentTitle = formData.letterTitle || 'Letter Subject';
+    let newTitle: string;
+    
+    if (isTitleBold) {
+      // Видаляємо <strong> теги
+      newTitle = currentTitle.replace(/<\/?strong>/g, '');
+    } else {
+      // Додаємо <strong> теги
+      const plainTitle = currentTitle.replace(/<\/?strong>/g, '');
+      newTitle = `<strong>${plainTitle}</strong>`;
+    }
+    
+    setIsTitleBold(!isTitleBold);
+    onFormChange({
+      ...formData,
+      date: formData.date || formatDate(new Date()), // Переконуємось що дата присутня
+      letterTitle: newTitle,
+    });
+  };
+
+  // Функція для перемикання видимості підпису
+  const toggleSignatureVisibility = () => {
+    const newVisibility = !isSignatureVisible;
+    setIsSignatureVisible(newVisibility);
+    
+    if (newVisibility) {
+      // Сіра кнопка - підпис ПОКАЗУЄТЬСЯ (нормальна робота)
+      onFormChange({
+        ...formData,
+        date: formData.date || formatDate(new Date()),
+        senderSignature: formData.senderSignature === '___HIDE_SIGNATURE___' 
+          ? 'Sincerely, [Your Full Name]. [Your Position], [Company].'
+          : formData.senderSignature
+      });
+    } else {
+      // Зелена кнопка - підпис ХОВАЄТЬСЯ
+      onFormChange({
+        ...formData,
+        date: formData.date || formatDate(new Date()),
+        senderSignature: '___HIDE_SIGNATURE___'
+      });
+    }
+  };
 
   const handleInputChange = (
     e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target;
+    
+    // Для letterTitle зберігаємо bold стан
+    if (name === 'letterTitle') {
+      const newValue = isTitleBold ? `<strong>${value}</strong>` : value;
+      onFormChange({
+        ...formData,
+        date: formData.date || formatDate(new Date()), // Переконуємось що дата присутня
+        [name]: newValue,
+      });
+    } else {
+      onFormChange({
+        ...formData,
+        date: formData.date || formatDate(new Date()), // Переконуємось що дата присутня
+        [name]: value,
+      });
+    }
+  };
+
+  // Handle Rich Text Editor changes
+  const handleRichTextChange = (fieldName: string, value: string) => {
     onFormChange({
       ...formData,
-      [name]: value,
+      [fieldName]: value,
     });
   };
 
@@ -87,54 +164,61 @@ export default function FormContainer({
     const letterTextIndex = allText.indexOf('Letter Text:');
     if (letterTextIndex !== -1) {
         let foundLetterText = false;
-        let letterText = '';
+        let letterTextHtml = '';
         
         const processNode = (node: Node) => {
-        if (node.nodeType === Node.TEXT_NODE) {
-            const text = node.textContent?.trim() || '';
-            if (text.includes('Letter Text:')) {
-            foundLetterText = true;
-            const afterMarker = text.split('Letter Text:')[1];
-            if (afterMarker?.trim()) {
-                letterText += afterMarker.trim();
-            }
-            } else if (foundLetterText && text) {
-            letterText += text;
-            }
-        } else if (node.nodeType === Node.ELEMENT_NODE) {
-            const element = node as HTMLElement;
-            
-            if (foundLetterText) {
-            if (element.tagName === 'UL' || element.tagName === 'OL') {
-                if (letterText && !letterText.endsWith('\n\n')) {
-                letterText += '\n\n';
+          if (node.nodeType === Node.TEXT_NODE) {
+              const text = node.textContent?.trim() || '';
+              if (text.includes('Letter Text:')) {
+                foundLetterText = true;
+                const afterMarker = text.split('Letter Text:')[1];
+                if (afterMarker?.trim()) {
+                    letterTextHtml += `<p>${afterMarker.trim()}</p>`;
                 }
-                element.querySelectorAll('li').forEach(li => {
-                letterText += '• ' + (li.textContent?.trim() || '') + '\n';
-                });
-                letterText += '\n';
-            } else if (element.tagName === 'P') {
-                if (letterText && !letterText.endsWith('\n\n')) {
-                letterText += '\n\n';
+              } else if (foundLetterText && text) {
+                letterTextHtml += `<p>${text}</p>`;
+              }
+          } else if (node.nodeType === Node.ELEMENT_NODE) {
+              const element = node as HTMLElement;
+              
+              if (foundLetterText) {
+                if (element.tagName === 'UL') {
+                    let listHtml = '<ul>';
+                    element.querySelectorAll('li').forEach(li => {
+                      listHtml += `<li>${li.textContent?.trim() || ''}</li>`;
+                    });
+                    listHtml += '</ul>';
+                    letterTextHtml += listHtml;
+                } else if (element.tagName === 'OL') {
+                    let listHtml = '<ol>';
+                    element.querySelectorAll('li').forEach(li => {
+                      listHtml += `<li>${li.textContent?.trim() || ''}</li>`;
+                    });
+                    listHtml += '</ol>';
+                    letterTextHtml += listHtml;
+                } else if (element.tagName === 'P') {
+                    const textContent = element.textContent?.trim();
+                    if (textContent) {
+                      letterTextHtml += `<p>${textContent}</p>`;
+                    }
+                } else if (element.tagName === 'H1' || element.tagName === 'H2' || element.tagName === 'H3') {
+                    const textContent = element.textContent?.trim();
+                    if (textContent) {
+                      letterTextHtml += `<${element.tagName.toLowerCase()}>${textContent}</${element.tagName.toLowerCase()}>`;
+                    }
+                } else {
+                    element.childNodes.forEach(child => processNode(child));
                 }
+              } else {
                 element.childNodes.forEach(child => processNode(child));
-            } else if (element.tagName === 'BR') {
-                letterText += '\n';
-            } else {
-                element.childNodes.forEach(child => processNode(child));
-            }
-            } else {
-            element.childNodes.forEach(child => processNode(child));
-            }
-        }
+              }
+          }
         };
         
         doc.body.childNodes.forEach(node => processNode(node));
         
-        if (letterText.trim()) {
-        parsedData.letterText = letterText
-            .replace(/\n{3,}/g, '\n\n')
-            .trim();
+        if (letterTextHtml.trim()) {
+          parsedData.letterText = letterTextHtml.trim();
         }
     }
     
@@ -362,7 +446,15 @@ export default function FormContainer({
               {field.label}
             </label>
             
-            {field.type === 'textarea' ? (
+            {field.type === 'textarea' && field.name === 'letterText' ? (
+              <div className="self-stretch">
+                <RichTextEditor
+                  value={formData[field.name] || defaultFormData.letterText}
+                  onChange={(value) => handleRichTextChange(field.name, value)}
+                  placeholder={field.placeholder}
+                />
+              </div>
+            ) : field.type === 'textarea' ? (
               <textarea
                 id={field.name}
                 name={field.name}
@@ -385,6 +477,63 @@ export default function FormContainer({
                 required={field.required}
                 className="self-stretch px-3 py-2 bg-neutral-100 rounded-lg outline outline-1 outline-offset-[-1px] outline-black/10 text-stone-500 text-sm font-normal font-['Inter'] leading-tight focus:outline-emerald-600 focus:bg-white transition-colors"
               />
+            ) : field.name === 'letterTitle' ? (
+              <div className="self-stretch flex items-stretch gap-2">
+                <input
+                  id={field.name}
+                  name={field.name}
+                  type="text"
+                  value={(formData[field.name] || '').replace(/<\/?strong>/g, '')}
+                  onChange={handleInputChange}
+                  placeholder={field.placeholder}
+                  required={field.required}
+                  className="flex-1 px-3 py-2 bg-neutral-100 rounded-lg outline outline-1 outline-offset-[-1px] outline-black/10 text-stone-500 text-sm font-normal font-['Inter'] leading-tight focus:outline-emerald-600 focus:bg-white transition-colors"
+                />
+                <button
+                  type="button"
+                  onClick={toggleTitleBold}
+                  className={`w-10 px-3 py-2 rounded-lg flex items-center justify-center transition-all flex-shrink-0 ${
+                    isTitleBold 
+                      ? 'bg-emerald-600 text-white' 
+                      : 'bg-neutral-100 text-neutral-400 hover:bg-neutral-200'
+                  }`}
+                  title={isTitleBold ? 'Remove bold' : 'Make bold'}
+                >
+                  <span className="text-base font-bold">B</span>
+                </button>
+              </div>
+            ) : field.name === 'senderSignature' ? (
+              <div className="self-stretch flex items-stretch gap-2">
+                <input
+                  id={field.name}
+                  name={field.name}
+                  type="text"
+                  value={formData[field.name] === '___HIDE_SIGNATURE___' ? '' : (formData[field.name] || '')}
+                  onChange={handleInputChange}
+                  placeholder={field.placeholder}
+                  required={field.required}
+                  disabled={!isSignatureVisible}
+                  className={`flex-1 px-3 py-2 rounded-lg outline outline-1 outline-offset-[-1px] outline-black/10 text-sm font-normal font-['Inter'] leading-tight transition-colors ${
+                    isSignatureVisible
+                      ? 'bg-neutral-100 text-stone-500 focus:outline-emerald-600 focus:bg-white'
+                      : 'bg-neutral-50 text-neutral-300 cursor-not-allowed'
+                  }`}
+                />
+                <button
+                  type="button"
+                  onClick={toggleSignatureVisibility}
+                  className={`w-10 px-3 py-2 rounded-lg flex items-center justify-center transition-all flex-shrink-0 ${
+                    !isSignatureVisible 
+                      ? 'bg-emerald-600 text-white' 
+                      : 'bg-neutral-100 text-neutral-400 hover:bg-neutral-200'
+                  }`}
+                  title={isSignatureVisible ? 'Hide signature' : 'Show signature'}
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+                  </svg>
+                </button>
+              </div>
             ) : (
               <input
                 id={field.name}
