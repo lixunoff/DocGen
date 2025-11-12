@@ -161,64 +161,75 @@ export default function FormContainer({
     if (recipientMatch) parsedData.recipient = recipientMatch[1].trim();
     if (signatureMatch) parsedData.senderSignature = signatureMatch[1].trim();
     
+    // Шукаємо Letter Text: в HTML
     const letterTextIndex = allText.indexOf('Letter Text:');
     if (letterTextIndex !== -1) {
-        let foundLetterText = false;
-        let letterTextHtml = '';
+        console.log('📝 Found "Letter Text:" marker');
         
-        const processNode = (node: Node) => {
+        // Знаходимо всі елементи після "Letter Text:"
+        let foundMarker = false;
+        const collectedElements: HTMLElement[] = [];
+        
+        const findElements = (node: Node) => {
           if (node.nodeType === Node.TEXT_NODE) {
-              const text = node.textContent?.trim() || '';
-              if (text.includes('Letter Text:')) {
-                foundLetterText = true;
-                const afterMarker = text.split('Letter Text:')[1];
-                if (afterMarker?.trim()) {
-                    letterTextHtml += `<p>${afterMarker.trim()}</p>`;
-                }
-              } else if (foundLetterText && text) {
-                letterTextHtml += `<p>${text}</p>`;
-              }
+            if (node.textContent?.includes('Letter Text:')) {
+              foundMarker = true;
+              console.log('✅ Marker found in text node');
+            }
           } else if (node.nodeType === Node.ELEMENT_NODE) {
-              const element = node as HTMLElement;
-              
-              if (foundLetterText) {
-                if (element.tagName === 'UL') {
-                    let listHtml = '<ul>';
-                    element.querySelectorAll('li').forEach(li => {
-                      listHtml += `<li>${li.textContent?.trim() || ''}</li>`;
-                    });
-                    listHtml += '</ul>';
-                    letterTextHtml += listHtml;
-                } else if (element.tagName === 'OL') {
-                    let listHtml = '<ol>';
-                    element.querySelectorAll('li').forEach(li => {
-                      listHtml += `<li>${li.textContent?.trim() || ''}</li>`;
-                    });
-                    listHtml += '</ol>';
-                    letterTextHtml += listHtml;
-                } else if (element.tagName === 'P') {
-                    const textContent = element.textContent?.trim();
-                    if (textContent) {
-                      letterTextHtml += `<p>${textContent}</p>`;
-                    }
-                } else if (element.tagName === 'H1' || element.tagName === 'H2' || element.tagName === 'H3') {
-                    const textContent = element.textContent?.trim();
-                    if (textContent) {
-                      letterTextHtml += `<${element.tagName.toLowerCase()}>${textContent}</${element.tagName.toLowerCase()}>`;
-                    }
-                } else {
-                    element.childNodes.forEach(child => processNode(child));
-                }
-              } else {
-                element.childNodes.forEach(child => processNode(child));
+            const element = node as HTMLElement;
+            
+            if (foundMarker) {
+              // Після маркера - збираємо всі P, UL, OL елементи
+              if (['P', 'UL', 'OL', 'H1', 'H2', 'H3'].includes(element.tagName)) {
+                collectedElements.push(element);
+                console.log(`📦 Collected ${element.tagName}:`, element.outerHTML.substring(0, 100));
               }
+            }
+            
+            // Рекурсивно обходимо дітей
+            element.childNodes.forEach(child => findElements(child));
           }
         };
         
-        doc.body.childNodes.forEach(node => processNode(node));
+        doc.body.childNodes.forEach(node => findElements(node));
+        
+        console.log(`📊 Total collected elements: ${collectedElements.length}`);
+        
+        // Конвертуємо зібрані елементи в HTML
+        let letterTextHtml = '';
+        collectedElements.forEach(element => {
+          if (element.tagName === 'P') {
+            const innerHTML = element.innerHTML.trim();
+            if (innerHTML && !innerHTML.includes('Letter Text:')) {
+              letterTextHtml += `<p>${innerHTML}</p>`;
+            }
+          } else if (element.tagName === 'UL') {
+            letterTextHtml += `<ul>`;
+            element.querySelectorAll('li').forEach(li => {
+              letterTextHtml += `<li>${li.innerHTML}</li>`;
+            });
+            letterTextHtml += `</ul>`;
+          } else if (element.tagName === 'OL') {
+            letterTextHtml += `<ol>`;
+            element.querySelectorAll('li').forEach(li => {
+              letterTextHtml += `<li>${li.innerHTML}</li>`;
+            });
+            letterTextHtml += `</ol>`;
+          } else if (['H1', 'H2', 'H3'].includes(element.tagName)) {
+            const innerHTML = element.innerHTML.trim();
+            if (innerHTML) {
+              letterTextHtml += `<${element.tagName.toLowerCase()}>${innerHTML}</${element.tagName.toLowerCase()}>`;
+            }
+          }
+        });
         
         if (letterTextHtml.trim()) {
           parsedData.letterText = letterTextHtml.trim();
+          console.log('✅ Letter text parsed successfully');
+          console.log('📄 Result HTML:', letterTextHtml.substring(0, 200));
+        } else {
+          console.log('⚠️ No letter text content found');
         }
     }
     
@@ -253,7 +264,8 @@ export default function FormContainer({
         }
       );
       
-      console.log('Extracted HTML:', result.value);
+      console.log('=== RAW HTML FROM MAMMOTH ===');
+      console.log(result.value);
       
       const parsedData = parseDocxHtml(result.value);
       

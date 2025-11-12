@@ -15,6 +15,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
 }) => {
   const editorRef = useRef<HTMLDivElement>(null);
   const quillRef = useRef<any>(null);
+  const isInitialMount = useRef(true);
 
   useEffect(() => {
     if (typeof window !== 'undefined' && editorRef.current && !quillRef.current) {
@@ -32,7 +33,6 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
           placeholder: placeholder,
           modules: {
             toolbar: [
-              // Видалили [{ 'header': [1, 2, 3, false] }] - це і був випадаючий список "Normal"
               ['bold', 'italic', 'underline'],
               [{ 'list': 'ordered' }, { 'list': 'bullet' }],
               ['link'],
@@ -41,9 +41,17 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
           }
         });
 
-        // Set initial content
+        // Set initial content using clipboard API (правильний спосіб для HTML зі списками)
         if (value) {
-          quill.root.innerHTML = value;
+          try {
+            // Використовуємо clipboard API для вставки HTML
+            const delta = (quill.clipboard as any).convert({ html: value });
+            quill.setContents(delta);
+          } catch (error) {
+            console.error('Error setting Quill content:', error);
+            // Fallback до innerHTML
+            quill.root.innerHTML = value;
+          }
         }
 
         // Listen for changes
@@ -53,6 +61,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
         });
 
         quillRef.current = quill;
+        isInitialMount.current = false;
       });
     }
 
@@ -66,8 +75,31 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
 
   // Update content when value prop changes externally
   useEffect(() => {
-    if (quillRef.current && value !== quillRef.current.root.innerHTML) {
-      quillRef.current.root.innerHTML = value;
+    if (quillRef.current && !isInitialMount.current) {
+      const currentHTML = quillRef.current.root.innerHTML;
+      
+      // Тільки оновлюємо якщо контент дійсно змінився
+      if (value !== currentHTML) {
+        console.log('🔄 Updating Quill content from external value');
+        
+        try {
+          // Зберігаємо позицію курсора
+          const selection = quillRef.current.getSelection();
+          
+          // Використовуємо clipboard API для правильної вставки HTML
+          const delta = (quillRef.current.clipboard as any).convert({ html: value });
+          quillRef.current.setContents(delta, 'silent');
+          
+          // Відновлюємо позицію курсора
+          if (selection) {
+            quillRef.current.setSelection(selection);
+          }
+        } catch (error) {
+          console.error('Error updating Quill content:', error);
+          // Fallback до innerHTML
+          quillRef.current.root.innerHTML = value;
+        }
+      }
     }
   }, [value]);
 
