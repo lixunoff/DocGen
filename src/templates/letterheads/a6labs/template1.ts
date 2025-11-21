@@ -430,6 +430,27 @@ export function getStyles(): string {
       text-decoration: underline;
     }
     
+    /* === ЗОБРАЖЕННЯ === */
+    
+    /* Зображення в тексті автоматично масштабуються */
+    .letter-text img {
+      max-width: 100%;
+      height: auto;
+      display: block;
+      margin: 8pt 0;
+    }
+    
+    /* Зображення в параграфі */
+    .letter-text p img {
+      margin: 4pt 0;
+    }
+    
+    /* Зображення в списках */
+    .letter-text li img {
+      margin: 4pt 0;
+      max-width: calc(100% - 20pt); /* Враховуємо padding списку */
+    }
+    
     /* Підпис */
     .signature {
       font-size: 9pt;
