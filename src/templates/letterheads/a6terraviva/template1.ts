@@ -9,6 +9,7 @@ export interface A6TerravivaTemplateData {
   recipient: string;
   letterText: string;
   signature?: string;
+  showStamps?: boolean;
 }
 
 function getImageBase64(imagePath: string): string {
@@ -29,7 +30,7 @@ export function generateFirstPage(
   pageNumber: number, 
   totalPages: number
 ): string {
-  const { date, letterTitle, recipient, letterText, signature } = data;
+  const { date, letterTitle, recipient, letterText, signature, showStamps = true } = data;
   
   const formattedDate = date.replace(/,\s*/g, ',<br>');
   const formattedRecipient = recipient.replace(/,\s*/g, ',<br>');
@@ -80,10 +81,10 @@ export function generateFirstPage(
         <div class="${mainContentClass}">
           <div class="left-column-dual">
             <div class="recipient">${formattedRecipient}</div>
-            <div class="stamps-container">
+            ${showStamps ? `<div class="stamps-container">
               ${stampA6Base64 ? `<img src="${stampA6Base64}" class="stamp-img" alt="A6 Labs Stamp" />` : '<div class="stamp-placeholder">A6 LABS<br>STAMP</div>'}
               ${stampTerravivaBase64 ? `<img src="${stampTerravivaBase64}" class="stamp-img" alt="Terraviva Stamp" />` : '<div class="stamp-placeholder">TERRAVIVA<br>STAMP</div>'}
-            </div>
+            </div>` : ''}
           </div>
           
           <div class="right-column">
@@ -103,7 +104,7 @@ export function generateContinuationPage(
   pageNumber: number, 
   totalPages: number
 ): string {
-  const { letterText, signature } = data;
+  const { letterText, signature, showStamps = true } = data;
   
   // Format signature
   const formattedSignature = signature
@@ -142,10 +143,10 @@ export function generateContinuationPage(
         
         <div class="main-content continuation">
           <div class="left-column-dual">
-            <div class="stamps-container">
+            ${showStamps ? `<div class="stamps-container">
               ${stampA6Base64 ? `<img src="${stampA6Base64}" class="stamp-img" alt="A6 Labs Stamp" />` : '<div class="stamp-placeholder">A6 LABS<br>STAMP</div>'}
               ${stampTerravivaBase64 ? `<img src="${stampTerravivaBase64}" class="stamp-img" alt="Terraviva Stamp" />` : '<div class="stamp-placeholder">TERRAVIVA<br>STAMP</div>'}
-            </div>
+            </div>` : ''}
           </div>
           
           <div class="right-column">

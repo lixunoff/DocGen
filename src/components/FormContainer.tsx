@@ -40,10 +40,19 @@ export default function FormContainer({
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [isTitleBold, setIsTitleBold] = useState(false);
   const [isSignatureVisible, setIsSignatureVisible] = useState(true);
+  const [showStamps, setShowStamps] = useState(true);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     console.log('🔄 FormContainer mounted, formData.date:', formData.date);
+    console.log('🎭 Current showStamps in formData:', formData.showStamps);
+    
+    // Відновлюємо стан showStamps зі збережених даних
+    if (formData.showStamps === 'false') {
+      setShowStamps(false);
+    } else if (formData.showStamps === 'true') {
+      setShowStamps(true);
+    }
     
     if (!formData.date) {
       console.log('⚠️ No date found, setting default date');
@@ -52,6 +61,13 @@ export default function FormContainer({
       onFormChange({
         ...formData,
         date: newDate,
+        showStamps: formData.showStamps || 'true' // Зберігаємо існуючий стан або дефолтний
+      });
+    } else if (!formData.showStamps) {
+      // Якщо дата є, але showStamps не встановлено - встановлюємо дефолтний
+      onFormChange({
+        ...formData,
+        showStamps: 'true'
       });
     }
     
@@ -105,6 +121,22 @@ export default function FormContainer({
         senderSignature: '___HIDE_SIGNATURE___'
       });
     }
+  };
+
+  // Функція для перемикання показу печаток
+  const toggleStamps = () => {
+    const newShowStamps = !showStamps;
+    console.log('🎭 Toggle stamps:', { from: showStamps, to: newShowStamps });
+    setShowStamps(newShowStamps);
+    
+    // Передаємо стан печаток через спеціальне поле
+    const updatedFormData = {
+      ...formData,
+      date: formData.date || formatDate(new Date()),
+      showStamps: newShowStamps ? 'true' : 'false'
+    };
+    console.log('📤 Sending formData with showStamps:', updatedFormData.showStamps);
+    onFormChange(updatedFormData);
   };
 
   const handleInputChange = (
@@ -197,12 +229,16 @@ export default function FormContainer({
         console.log(`📊 Total collected elements: ${collectedElements.length}`);
         
         // Конвертуємо зібрані елементи в HTML
+        // ВАЖЛИВО: НЕ додаємо автоматичні відступи, mammoth вже їх обробив
         let letterTextHtml = '';
         collectedElements.forEach(element => {
           if (element.tagName === 'P') {
             const innerHTML = element.innerHTML.trim();
             if (innerHTML && !innerHTML.includes('Letter Text:')) {
               letterTextHtml += `<p>${innerHTML}</p>`;
+            } else if (!innerHTML) {
+              // Порожній параграф з mammoth = відступ
+              letterTextHtml += '<p><br></p>';
             }
           } else if (element.tagName === 'UL') {
             letterTextHtml += `<ul>`;
@@ -560,6 +596,27 @@ export default function FormContainer({
             )}
           </div>
         ))}
+
+        {/* Toggle для показу печаток */}
+        <div className="self-stretch flex items-center justify-between py-3 border-t border-gray-200">
+          <label className="text-sm font-medium text-gray-700">
+            Show stamps
+          </label>
+          <button
+            type="button"
+            onClick={toggleStamps}
+            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+              showStamps ? 'bg-emerald-600' : 'bg-gray-200'
+            }`}
+            title={showStamps ? 'Stamps visible' : 'Stamps hidden'}
+          >
+            <span
+              className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                showStamps ? 'translate-x-6' : 'translate-x-1'
+              }`}
+            />
+          </button>
+        </div>
       </div>
     </div>
   );

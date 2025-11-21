@@ -9,6 +9,7 @@ export interface A6LabsTemplateData {
   recipient: string;
   letterText: string;
   signature?: string;
+  showStamps?: boolean;
 }
 
 function getImageBase64(imagePath: string): string {
@@ -29,7 +30,7 @@ export function generateFirstPage(
   pageNumber: number, 
   totalPages: number
 ): string {
-  const { date, letterTitle, recipient, letterText, signature } = data;
+  const { date, letterTitle, recipient, letterText, signature, showStamps = true } = data;
   
   const formattedDate = date.replace(/,\s*/g, ',<br>');
   const formattedRecipient = recipient.replace(/,\s*/g, ',<br>');
@@ -69,9 +70,9 @@ export function generateFirstPage(
         <div class="${mainContentClass}">
           <div class="left-column">
             <div class="recipient">${formattedRecipient}</div>
-            <div class="stamp-container">
+            ${showStamps ? `<div class="stamp-container">
               ${stampBase64 ? `<img src="${stampBase64}" class="stamp-img" alt="Stamp" />` : '<div class="stamp-placeholder">A6 LABS<br>STAMP</div>'}
-            </div>
+            </div>` : ''}
           </div>
           
           <div class="right-column">
@@ -91,7 +92,7 @@ export function generateContinuationPage(
   pageNumber: number, 
   totalPages: number
 ): string {
-  const { letterText, signature } = data;
+  const { letterText, signature, showStamps = true } = data;
   
   // Format signature
   const formattedSignature = signature
@@ -119,9 +120,9 @@ export function generateContinuationPage(
         
         <div class="main-content continuation">
           <div class="left-column">
-            <div class="stamp-container">
+            ${showStamps ? `<div class="stamp-container">
               ${stampBase64 ? `<img src="${stampBase64}" class="stamp-img" alt="Stamp" />` : '<div class="stamp-placeholder">A6 LABS<br>STAMP</div>'}
-            </div>
+            </div>` : ''}
           </div>
           
           <div class="right-column">

@@ -11,6 +11,7 @@ interface FormData {
   recipient: string;
   senderSignature: string;
   letterText: string;
+  showStamps?: string; // 'true' або 'false'
 }
 
 export async function POST(request: NextRequest) {
@@ -30,7 +31,8 @@ export async function POST(request: NextRequest) {
       letterTitle: formData.letterTitle?.substring(0, 50),
       hasRecipient: !!formData.recipient,
       hasSignature: !!formData.senderSignature,
-      letterTextLength: formData.letterText?.length || 0
+      letterTextLength: formData.letterText?.length || 0,
+      showStamps: formData.showStamps
     });
     
     // Fallback для дати якщо вона порожня
@@ -696,6 +698,13 @@ function generateMultiPageHTML(
   const shouldHideSignature = formData.senderSignature === '___HIDE_SIGNATURE___';
   const actualSignature = shouldHideSignature ? undefined : formData.senderSignature;
   
+  // Перевіряємо чи печатки мають бути показані (за замовчуванням true)
+  const shouldShowStamps = formData.showStamps !== 'false';
+  console.log('🎭 generateMultiPageHTML - showStamps:', {
+    raw: formData.showStamps,
+    shouldShowStamps: shouldShowStamps
+  });
+  
   if (totalPages === 1) {
     // Одна сторінка з підписом (якщо не схована)
     pages.push(template.generateFirstPage({
@@ -703,7 +712,8 @@ function generateMultiPageHTML(
       letterTitle: formData.letterTitle,
       recipient: formData.recipient,
       letterText: textPages[0],
-      signature: actualSignature
+      signature: actualSignature,
+      showStamps: shouldShowStamps
     }, 1, totalPages));
   } else {
     // Перша сторінка без підпису
@@ -711,7 +721,8 @@ function generateMultiPageHTML(
       date: formData.date,
       letterTitle: formData.letterTitle,
       recipient: formData.recipient,
-      letterText: textPages[0]
+      letterText: textPages[0],
+      showStamps: shouldShowStamps
     }, 1, totalPages));
     
     // Сторінки продовження
@@ -722,7 +733,8 @@ function generateMultiPageHTML(
         letterTitle: formData.letterTitle,
         recipient: formData.recipient,
         letterText: textPages[i],
-        signature: isLastPage ? actualSignature : undefined
+        signature: isLastPage ? actualSignature : undefined,
+        showStamps: shouldShowStamps
       }, i + 1, totalPages));
     }
   }

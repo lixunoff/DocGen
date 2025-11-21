@@ -27,17 +27,15 @@ export default function PDFPreview({
       try {
         setIsLoading(true);
         
+        console.log('🚀 PDFPreview: Generating PDF');
+        console.log('📋 formData:', formData);
+        console.log('🎭 showStamps:', formData.showStamps);
+        
         const response = await fetch('/api/generate-pdf', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ 
-            formData: {
-              date: formData.date || '',
-              letterTitle: formData.letterTitle || '',
-              recipient: formData.recipient || '',
-              senderSignature: formData.senderSignature || '',
-              letterText: formData.letterText || ''
-            }, 
+            formData: formData, // ✅ Передаємо весь formData (включно з showStamps)
             templateId,
             shouldMeasure: true
           })
@@ -55,6 +53,7 @@ export default function PDFPreview({
         
         const url = URL.createObjectURL(blob);
         setPdfUrl(url);
+        console.log('✅ PDF generated successfully');
       } catch (error) {
         console.error('Error generating preview:', error);
       } finally {

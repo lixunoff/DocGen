@@ -35,7 +35,8 @@ export default function Home() {
     letterTitle: 'Letter Subject',
     recipient: '[Full Name], [Position], [Company]',
     senderSignature: 'Sincerely, [Your Full Name]. [Your Position], [Company].',
-    letterText: `<p>Dear [Recipient Name],</p><p>[Write your letter content here. You can paste formatted text from Word or Google Docs, including bullet points and paragraphs.]</p>`
+    letterText: `<p>Dear [Recipient Name],</p><p>[Write your letter content here. You can paste formatted text from Word or Google Docs, including bullet points and paragraphs.]</p>`,
+    showStamps: 'true' // ✅ Ініціалізуємо showStamps
   });
 
   const [shouldGeneratePreview, setShouldGeneratePreview] = useState(false);
@@ -69,13 +70,13 @@ export default function Home() {
   useEffect(() => {
     if (selectedCompany === 'a6terraviva') {
       setFormData(prev => ({
-        ...prev,
+        ...prev, // ✅ Зберігаємо всі існуючі поля (включно з showStamps)
         date: prev.date || formatDate(new Date()),
         senderSignature: 'Sincerely, Harib Bakhshi, CEO, A6 Labs. Felix Mechnig-Giordano, General Manager, Terraviva'
       }));
     } else if (selectedCompany === 'a6labs') {
       setFormData(prev => ({
-        ...prev,
+        ...prev, // ✅ Зберігаємо всі існуючі поля (включно з showStamps)
         date: prev.date || formatDate(new Date()),
         senderSignature: 'Sincerely, [Your Full Name]. [Your Position], [Company].'
       }));
@@ -90,6 +91,9 @@ export default function Home() {
   }, [selectedTemplateId, isInitialLoad]);
 
   const handleGeneratePreview = () => {
+    console.log('🚀 Generate Preview clicked');
+    console.log('📋 Current formData:', formData);
+    console.log('🎭 showStamps value:', formData.showStamps);
     setShouldGeneratePreview(true);
   };
 
